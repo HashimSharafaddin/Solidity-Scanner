@@ -6,7 +6,7 @@ import os
 from django.shortcuts import render, redirect
 from django.conf import settings
 
-from contracts.processing import scan_file
+from contracts.project_gnn import scan_file
 
 
 def pages(request):
@@ -88,7 +88,7 @@ def handle_scan_logic(request):
     else:
         msg = form.non_field_errors()  # Errors from `clean()` method
         scan_result = None
-
+    # print(scan_result)
     return scan_result, msg
 
 
