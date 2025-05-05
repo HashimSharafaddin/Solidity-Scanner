@@ -1,0 +1,11 @@
+.navbar-nav .nav-item .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Example: Slightly transparent white */
+  color: #f8f9fa; /* Optional: Change text color on hover */
+  border-radius: 0.25rem; /* Optional: Add a slight rounded border */
+}
+
+/* For dropdown items */
+.dropdown-menu .dropdown-item:hover {
+  background-color: #e9ecef; /* Example: Light gray */
+  color: #212529; /* Optional: Change text color on hover */
+}

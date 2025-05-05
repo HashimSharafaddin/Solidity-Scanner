@@ -1,0 +1,108 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %} Scan {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <main>
+
+
+            <div class="py-4" style="padding: 30px">
+
+                <div class="d-flex justify-content-center w-100 flex-wrap">
+                    <div class="mb-3 mb-lg-0">
+                        <h1 class="text-center">Solidity Scanner</h1>
+                    </div>
+
+                </div>
+            </div>
+
+        <div class="row">
+
+
+
+
+
+        <section class="mt-5 mt-lg-0 bg-soft d-flex">
+            <div class="container">
+                <div class="row justify-content-s">
+
+
+                    <div class="col-12 d-flex align-items-center justify-content-center">
+                        <div class="signin-inner my-3 my-lg-0 bg-white shadow border-0 rounded p-4 p-lg-5 w-100 fmxw-500">
+                            <h1  class="h3 text-center">Quick Scan</h1>
+
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="mb-3" style="margin-top: 20px">
+                                    {{ form.contract_file.label_tag }}
+                                    {{ form.contract_file }}
+                                    {% if form.contract_file.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {% for error in form.contract_file.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <h2 class="text-center" style="margin: 10px">OR</h2>
+
+                                <div class="my-4">
+                                    {{ form.contract_input.label_tag }}
+                                    {{ form.contract_input }}
+                                    {% if form.contract_input.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {% for error in form.contract_input.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+
+                                <div class="d-grid">
+                                    <button type="submit" class="btn-lg btn-secondary align-items-center">Start</button>
+                                </div>
+                            </form>
+
+                            <div id="scan_error" style="margin-top: 20px">
+                                {% if scan_error %}
+                                    <small class="text text-danger">{{ scan_error }}</small>
+                                {% endif %}
+                            </div>
+
+
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </section>
+
+        {% if scan_result %}
+
+            <section class="vh-lg-100 mb-5 mt-5 mt-lg-0 bg-soft"  style="padding-top: 50px;padding-left: 50px; padding-right: 50px">
+                {% include 'home/scan_result.html' %}
+            </section>
+        {% endif %}
+
+
+        </div>
+
+    </main>
+
+
+
+    {% include 'includes/scripts.html' %}
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

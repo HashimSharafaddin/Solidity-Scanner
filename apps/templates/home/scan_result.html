@@ -1,0 +1,162 @@
+{#{% extends "layouts/base.html" %}#}
+
+{% block title %}  {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+{#    <div class="py-4">#}
+{##}
+{#        <div class="d-flex justify-content-between w-100 flex-wrap">#}
+{#            <div class="mb-3 mb-lg-0">#}
+{#                <h1 class="h4">Contract Scan Result</h1>#}
+{#            </div>#}
+{##}
+{#        </div>#}
+{#    </div>#}
+{##}
+
+
+
+    <div class="row">
+
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow components-section">
+                <div class="card-body">
+
+
+
+                    <!-- Name  -->
+                    <div class="row">
+                        <div class="">
+                            <h1 class="h3 mb-5 text-center">Scan Result</h1>
+                        </div>
+
+
+                        <span class="fw-normal">{{ scan_result.createDate|date:"d M Y" }}</span>
+                    </div>
+
+
+
+                    <div class="row py-3 align-items-center">
+
+                        <div class="col-sm-2">
+                            <span class="h6 fw-bold">Status</span>
+                        </div>
+
+                        {% if scan_result.status == 0 %}
+
+                            <div class="col-sm-2">
+                                <small class="text-uppercase text-muted">Fine</small>
+                            </div>
+
+                        {% elif scan_result.status == 1  %}
+                            <div class="col-sm-10">
+                                <p class="text-danger mb-0">Danger</p>
+                            </div>
+                        {% else  %}
+
+                            <div class="col-sm-10">
+                                <p class="text-info mb-0">Not valid</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row py-3 align-items-center">
+                        <div class="mb-3">
+                            <span class="h6 fw-bold">Vulnerability Found</span>
+                        </div>
+                    </div>
+
+
+                    {#table#}
+                    <div class="card border-0 shadow mb-4">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-centered table-nowrap mb-0 rounded">
+                                    <thead class="thead-light">
+                                    <tr>
+                                        <th class="border-0 rounded-start">#</th>
+                                        <th class="border-0">Bug Type</th>
+                                        <th class="border-0">Confidence</th>
+                                        <th class="border-0">Severity</th>
+                                        <th class="border-0">Detection method</th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for detection in scan_result.reportDetections %}
+
+
+                                        <tr>
+                                            <td><a href="#" class="text-primary fw-bold">{{ forloop.counter }}</a> </td>
+
+                                            <td class="fw-bold d-flex align-items-center"> {{ detection.class_name }} </td>
+
+                                            <td  >{{ detection.confidence }}%</td>
+
+                                            <td class="text-success">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="fw-bold" style="color: {{ detection.severity_color }} ">
+                                                        {{ detection.severity }}
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <td>Automated</td>
+
+                                        </tr>
+
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                     <div class="row py-3 align-items-center">
+                         <div class="mb-3">
+                             <span class="h6 fw-bold">Vulnerability Details</span>
+                         </div>
+                     </div>
+
+                    {% for detection in scan_result.reportDetections %}
+
+                        <div class="row mb-4 mb-lg-5">
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <span class="h5 fw-bold">{{ detection.class_name }}</span>
+                                        </div>
+
+                                        <small class="text text-muted">{{ detection.desc }}</small>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    {% endfor %}
+
+
+
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
