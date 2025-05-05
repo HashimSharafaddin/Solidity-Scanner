@@ -33,10 +33,21 @@
                         <div class="">
                             <h1 class="h3 mb-5 text-center">Scan Result</h1>
                         </div>
-
-
-                        <span class="fw-normal">{{ scan_result.createDate|date:"d M Y" }}</span>
                     </div>
+
+
+                    <div class="row py-3 align-items-center">
+
+                        <div class="col-sm-2">
+                            <span class="h6 fw-bold">Result</span>
+                        </div>
+
+                        <div class="col-sm-8">
+                            <small class="text text-muted">{{ scan_result.report }}</small>
+                        </div>
+                    </div>
+
+
 
 
 
@@ -70,7 +81,6 @@
                         </div>
                     </div>
 
-
                     {#table#}
                     <div class="card border-0 shadow mb-4">
                         <div class="card-body">
@@ -80,8 +90,8 @@
                                     <tr>
                                         <th class="border-0 rounded-start">#</th>
                                         <th class="border-0">Bug Type</th>
-                                        <th class="border-0">Confidence</th>
-                                        <th class="border-0">Severity</th>
+                                        <th class="border-0">Detection Tool</th>
+{#                                        <th class="border-0">Severity</th>#}
                                         <th class="border-0">Detection method</th>
 
                                     </tr>
@@ -95,15 +105,15 @@
 
                                             <td class="fw-bold d-flex align-items-center"> {{ detection.class_name }} </td>
 
-                                            <td  >{{ detection.confidence }}%</td>
+                                            <td  >{{ detection.detection_tool }}</td>
 
-                                            <td class="text-success">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="fw-bold" style="color: {{ detection.severity_color }} ">
-                                                        {{ detection.severity }}
-                                                    </span>
-                                                </div>
-                                            </td>
+{#                                            <td class="text-success">#}
+{#                                                <div class="d-flex align-items-center">#}
+{#                                                    <span class="fw-bold" style="color: {{ detection.severity_color }} ">#}
+{#                                                        {{ detection.severity }}#}
+{#                                                    </span>#}
+{#                                                </div>#}
+{#                                            </td>#}
 
                                             <td>Automated</td>
 
@@ -119,13 +129,14 @@
 
 
 
-                     <div class="row py-3 align-items-center">
+                    {% if scan_result.status == 1 %}
+
+                        <div class="row py-3 align-items-center">
                          <div class="mb-3">
                              <span class="h6 fw-bold">Vulnerability Details</span>
                          </div>
                      </div>
-
-                    {% for detection in scan_result.reportDetections %}
+                        {% for detection in scan_result.reportDetections %}
 
                         <div class="row mb-4 mb-lg-5">
                             <div class="col-md-6">
@@ -145,6 +156,7 @@
                     {% endfor %}
 
 
+                    {% endif %}
 
 
 
