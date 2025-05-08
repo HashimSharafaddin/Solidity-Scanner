@@ -158,6 +158,7 @@ def scan_file(mode, file_path, contract_content):
     detections = []
     status = 2
     stop_detection = False
+    check_result = ""
 
     if mode == 1:
         if contract_content is None:
@@ -195,12 +196,14 @@ def scan_file(mode, file_path, contract_content):
                 "type": "Reentrancy",
                 "class_name": "Reentrancy",
                 "detection_tool": 'Mythril',
+                "multi_tools": "0",
                 "desc": " Reentrancy is when a contract makes an external call before updating state. This may lead to repeated calls and fund drainage."
             })
             detections.append({
                 "type": "Bad_Randomness",
                 "class_name": "Bad Randomness",
                 "detection_tool": 'Mythril',
+                "multi_tools": "0",
                 "desc":"Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
             })
             print("Both vulnerabilities found with Mythril. Skipping other checks.")
@@ -217,6 +220,7 @@ def scan_file(mode, file_path, contract_content):
             detections.append({
                 "type": "Reentrancy",
                 "class_name": "Reentrancy",
+                "multi_tools": "0",
                 "detection_tool": 'Manticore',
                 "desc": " Reentrancy is when a contract makes an external call before updating state. This may lead to repeated calls and fund drainage."
             })
@@ -224,11 +228,12 @@ def scan_file(mode, file_path, contract_content):
                 "type": "Bad_Randomness",
                 "class_name": "Bad Randomness",
                 "detection_tool": 'Manticore',
+                "multi_tools": "0",
                 "desc":"Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
             })
 
             print("Both vulnerabilities found with Manticore. Skipping GNN check.")
-            report =  "Both vulnerabilities found with Manticore."
+            report = report + "\n Both vulnerabilities found with Manticore."
             stop_detection = True
             exit(0)
 
@@ -242,15 +247,28 @@ def scan_file(mode, file_path, contract_content):
                 "Manticore": manticore_result["Reentrancy"],
                 "GNN": gnn_result["Reentrancy"]
             }
+
+
+            tools_res = []
+            for tool, result in tool_results.items():
+                check_st = "Detected" if result else "Not Detected"
+                tools_res.append({
+                    "t_name": tool,
+                    "t_status":check_st,
+                })
+                print(f"{tool}: {status}")
+
             detectors = [tool for tool, result in tool_results.items() if result]
             status = 1
             vulnerability_count = 1
-            report = "\n Reentrancy is found with " + ", ".join(detectors)
+            report = "\n Reentrancy is detected with " + ", ".join(detectors)
 
             detections.append({
                 "type": "Reentrancy",
                 "class_name": "Reentrancy",
                 "detection_tool": ", ".join(detectors),
+                "multi_tools": "1",
+                "tools_res": tools_res,
                 "desc": " Reentrancy is when a contract makes an external call before updating state. This may lead to repeated calls and fund drainage."
 
             })
@@ -262,14 +280,26 @@ def scan_file(mode, file_path, contract_content):
                 "Manticore": manticore_result["Bad Randomness"],
                 "GNN": gnn_result["Bad Randomness"]
             }
-            detectors = [tool for tool, result in tool_results.items() if result]
 
+            tools_res = []
+            for tool, result in tool_results.items():
+                check_st = "Detected" if result else "Not Detected"
+                check_result = f"{check_result} {tool}: {check_st}<br>"
+                tools_res.append({
+                    "t_name": tool,
+                    "t_status":check_st,
+                })
+                print(f"{tool}: {result}")
+
+            detectors = [tool for tool, result in tool_results.items() if result]
             status = 1
             vulnerability_count = vulnerability_count + 1
             detections.append({
                 "type": "Bad_Randomness",
                 "class_name": "Bad Randomness",
                 "detection_tool": ", ".join(detectors),
+                "multi_tools": "1",
+                "tools_res": tools_res,
                 "desc":"Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
             })
             report = report + "\n Bad Randomness is detected with " + ", ".join(detectors)
@@ -277,7 +307,6 @@ def scan_file(mode, file_path, contract_content):
 
         if not any([*mythril_result.values(), *manticore_result.values(), *gnn_result.values()]):
             status = 0
-            # print("No vulnerabilities detected by any tool.")
             report = "No vulnerabilities detected by any tool."
 
         content = {

@@ -79,8 +79,11 @@ def handle_scan_logic(request):
         # Text input
         elif form.cleaned_data['contract_input']:
             contract_code = form.cleaned_data['contract_input']
-            res, msg = scan_file(1, '', contract_code)
-            scan_result = msg if res is None else res
+            res, err = scan_file(1, '', contract_code)
+            if res is None:
+                scan_result = err
+            else:
+                scan_result = res
 
         else:
             msg = 'No contract content provided'
