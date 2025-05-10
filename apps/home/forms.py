@@ -18,7 +18,7 @@ class ScanFileForm(forms.Form):
         required=False)  # Make this optional initially
 
     contract_input = forms.CharField(
-        label='Paste your contract code here',
+        label='Paste the contract raw bytecode ',
         widget=forms.Textarea(
             attrs={
                 "class": "form-control",

@@ -4,6 +4,7 @@
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
 
 {% block content %}
 
@@ -66,9 +67,13 @@
 
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn-lg btn-secondary align-items-center">Start</button>
+                                    <button type="submit" class="btn-lg btn-secondary align-items-center" id="startButton">Start</button>
                                 </div>
                             </form>
+
+{#                            <div id="progressSpinner" style="display: none;">#}
+{#                                <img src="{% static 'images/spinner.gif' %}" alt="Loading..." />#}
+{#                            </div>#}
 
                             <div id="scan_error" style="margin-top: 20px">
                                 {% if scan_error %}
@@ -101,6 +106,40 @@
 
 
     {% include 'includes/scripts.html' %}
+
+{#    <script>#}
+{#        document.getElementById('startButton').addEventListener('click', function() {#}
+{#            var formData = new FormData();#}
+{#            // Add form data if any (this depends on your form, like file or text input)#}
+{##}
+{#            // Show progress spinner#}
+{#            document.getElementById('progressSpinner').style.display = 'block';#}
+{##}
+{#            fetch("{% url 'index' %}", {#}
+{#                method: "POST",#}
+{#                body: formData,#}
+{#                headers: {#}
+{#                    'X-Requested-With': 'XMLHttpRequest'#}
+{#                }#}
+{#            })#}
+{#                .then(response => response.json())#}
+{#                .then(data => {#}
+{#                    // Hide progress spinner#}
+{#                    document.getElementById('progressSpinner').style.display = 'none';#}
+{##}
+{#                    // Display the scan result or error message#}
+{#                    document.getElementById('scanResult').innerHTML = `#}
+{#                    <h3>Scan Result</h3>#}
+{#                    <pre>${data.scan_result || data.msg}</pre>#}
+{#                `;#}
+{#                })#}
+{#                .catch(error => {#}
+{#                    console.error('Error:', error);#}
+{#                    document.getElementById('progressSpinner').style.display = 'none';#}
+{#                });#}
+{#        });#}
+{#    </script>#}
+
 
 {% endblock content %}
 

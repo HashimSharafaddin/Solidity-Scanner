@@ -91,16 +91,25 @@ def scan_with_gnn(bytecode):
 
 
 def scan_with_mythril(bytecode):
+    print(bytecode)
+
     try:
         result = subprocess.run([
-            "docker", "run", "--rm", "-v", f"{os.getcwd()}:/tmp",
-            "mythril/myth", "analyze", "--code", bytecode
-        ], capture_output=True, text=True)
+            "docker", "run", "--rm", "mythril/myth",
+            "analyze", "--execution-timeout", "90",
+            "--code", bytecode, "--no-onchain-data"
+        ], capture_output=True, text=True, timeout=120)
+
+        print("STDOUT:", result.stdout)
+        print("STDERR:", result.stderr)
         output = result.stdout.lower()
         return {
             "Reentrancy": "reentrancy" in output,
             "Bad Randomness": any(x in output for x in ["timestamp", "block.number"])
         }
+    except subprocess.TimeoutExpired:
+        print("Mythril timed out.")
+        return {"Reentrancy": False, "Bad Randomness": False}
     except Exception as e:
         print(f"Mythril Docker Error: {e}")
         return {"Reentrancy": False, "Bad Randomness": False}
@@ -166,8 +175,7 @@ def scan_file(mode, file_path, contract_content):
             return None, message
         else:
             contract_content_text = contract_content
-            bytecode = compile_solidity(contract_content_text)
-            # bytecode = compile_solidity_to_bytecode(contract_content)
+            bytecode = contract_content_text
             print(contract_content)
     elif mode == 2:
         if file_path is None:
@@ -179,7 +187,7 @@ def scan_file(mode, file_path, contract_content):
             with open(path, 'r') as f:
                 source_code = f.read()
             contract_content_text = source_code
-            print(source_code)
+            # print(source_code)
             bytecode = compile_solidity(source_code)
             # print(bytecode)
     else:
@@ -204,14 +212,13 @@ def scan_file(mode, file_path, contract_content):
                 "class_name": "Bad Randomness",
                 "detection_tool": 'Mythril',
                 "multi_tools": "0",
-                "desc":"Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
+                "desc": "Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
             })
-            print("Both vulnerabilities found with Mythril. Skipping other checks.")
+            # print("Both vulnerabilities found with Mythril. Skipping other checks.")
             report = "Both vulnerabilities found with Mythril. Skipping other checks."
             stop_detection = True
-            # exit(0)
 
-
+        abi_content = '[{"inputs": [], "stateMutability": "nonpayable", "type": "constructor"}, ...]'
         manticore_result = scan_with_manticore(bytecode)
         print("Manticore Result:", manticore_result)
         if manticore_result["Reentrancy"] and manticore_result["Bad Randomness"]:
@@ -229,7 +236,7 @@ def scan_file(mode, file_path, contract_content):
                 "class_name": "Bad Randomness",
                 "detection_tool": 'Manticore',
                 "multi_tools": "0",
-                "desc":"Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
+                "desc": "Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
             })
 
             print("Both vulnerabilities found with Manticore. Skipping GNN check.")
@@ -241,20 +248,20 @@ def scan_file(mode, file_path, contract_content):
         print("GNN Model Result:", gnn_result)
 
         print("\n=== Summary ===")
-        if not stop_detection and any([mythril_result["Reentrancy"], manticore_result["Reentrancy"], gnn_result["Reentrancy"]]):
+        if not stop_detection and any(
+                [mythril_result["Reentrancy"], manticore_result["Reentrancy"], gnn_result["Reentrancy"]]):
             tool_results = {
                 "Mythril": mythril_result["Reentrancy"],
                 "Manticore": manticore_result["Reentrancy"],
                 "GNN": gnn_result["Reentrancy"]
             }
 
-
             tools_res = []
             for tool, result in tool_results.items():
                 check_st = "Detected" if result else "Not Detected"
                 tools_res.append({
                     "t_name": tool,
-                    "t_status":check_st,
+                    "t_status": check_st,
                 })
                 print(f"{tool}: {status}")
 
@@ -274,7 +281,8 @@ def scan_file(mode, file_path, contract_content):
             })
             print("- Reentrancy vulnerability detected.")
 
-        if not stop_detection and any([mythril_result["Bad Randomness"], manticore_result["Bad Randomness"], gnn_result["Bad Randomness"]]):
+        if not stop_detection and any(
+                [mythril_result["Bad Randomness"], manticore_result["Bad Randomness"], gnn_result["Bad Randomness"]]):
             tool_results = {
                 "Mythril": mythril_result["Bad Randomness"],
                 "Manticore": manticore_result["Bad Randomness"],
@@ -287,7 +295,7 @@ def scan_file(mode, file_path, contract_content):
                 check_result = f"{check_result} {tool}: {check_st}<br>"
                 tools_res.append({
                     "t_name": tool,
-                    "t_status":check_st,
+                    "t_status": check_st,
                 })
                 print(f"{tool}: {result}")
 
@@ -300,7 +308,7 @@ def scan_file(mode, file_path, contract_content):
                 "detection_tool": ", ".join(detectors),
                 "multi_tools": "1",
                 "tools_res": tools_res,
-                "desc":"Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
+                "desc": "Bad Randomness happens when contracts use predictable sources (e.g., block.timestamp) to generate random values. Attackers can exploit this."
             })
             report = report + "\n Bad Randomness is detected with " + ", ".join(detectors)
             print("- Bad Randomness vulnerability detected.")
@@ -365,10 +373,6 @@ def get_severity_color(score):
     else:
         return '#68FF88'
 
-
-
-
-
 # # Entry point
 # if __name__ == "__main__":
 #     print("=== Smart Contract Vulnerability Scanner ===")
@@ -422,4 +426,3 @@ def get_severity_color(score):
 #
 #     if not any([*mythril_result.values(), *manticore_result.values(), *gnn_result.values()]):
 #         print("No vulnerabilities detected by any tool.")
-
